@@ -1,0 +1,40 @@
+{
+    "FileVersion": 3,
+    "Version": 1,
+    "VersionName": "1.0",
+    "FriendlyName": "PCGUtils PCGEx Interop",
+    "Description": "Optional interoperability between PCGUtils and PCGExtendedToolkit.",
+    "Category": "PCG",
+    "CreatedBy": "Max Harris",
+    "CreatedByURL": "",
+    "DocsURL": "",
+    "MarketplaceURL": "",
+    "SupportURL": "",
+    "CanContainContent": false,
+    "IsBetaVersion": false,
+    "EngineVersion": "5.8.0",
+    "IsExperimentalVersion": false,
+    "Installed": false,
+    "Modules": [
+        {
+            "Name": "PCGUtilsPCGExInterop",
+            "Type": "Runtime",
+            "LoadingPhase": "PostDefault"
+        },
+        {
+            "Name": "PCGUtilsPCGExDynMeshInterop",
+            "Type": "Runtime",
+            "LoadingPhase": "PostDefault"
+        }
+    ],
+    "Plugins": [
+        {
+            "Name": "PCGUtils",
+            "Enabled": true
+        },
+        {
+            "Name": "PCGExtendedToolkit",
+            "Enabled": true
+        }
+    ]
+}
