@@ -20,7 +20,12 @@ public class PCGUtilsPCGExDynMeshInterop : ModuleRules
                 "PCGUtilsCore",
                 "PCGUtilsDynMesh",
                 "PCGExCore",
-                "PCGExMatching"
+                "PCGExMatching",
+                // DynMeshEx | Merge appends meshes itself.
+                "DynamicMesh",
+                "GeometryCore",
+                "GeometryFramework",
+                "PCGGeometryScriptInterop"
             }
         );
 

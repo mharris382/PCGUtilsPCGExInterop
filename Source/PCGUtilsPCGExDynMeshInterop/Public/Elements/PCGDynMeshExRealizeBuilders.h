@@ -55,6 +55,14 @@ protected:
 
 class PCGUTILSPCGEXDYNMESHINTEROP_API FPCGDynMeshExRealizeBuildersElement : public FPCGDynMeshRealizeBuildersElement
 {
+public:
+	/**
+	 * A PCGEx match rule is point-derived data. PCG turns every point-derived input into plain point data before a
+	 * node runs unless the node says it can take them as they are, and a rule turned into plain points is no longer
+	 * a rule: the node would report that it received none.
+	 */
+	virtual bool SupportsBasePointDataInputs(FPCGContext* InContext) const override { return true; }
+
 protected:
 	virtual bool ExecuteInternal(FPCGContext* Context) const override;
 };
