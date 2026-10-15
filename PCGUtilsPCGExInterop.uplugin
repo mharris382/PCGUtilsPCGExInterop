@@ -25,6 +25,11 @@
             "Name": "PCGUtilsPCGExDynMeshInterop",
             "Type": "Runtime",
             "LoadingPhase": "PostDefault"
+        },
+        {
+            "Name": "PCGUtilsPCGExInteropEditor",
+            "Type": "Editor",
+            "LoadingPhase": "PostDefault"
         }
     ],
     "Plugins": [

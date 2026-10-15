@@ -8,18 +8,19 @@ public class PCGUtilsPCGExInterop : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        // FPCGUtilsCollectionCategoryHandle names a PCGEx collection in its public header.
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core"
+                "Core",
+                "CoreUObject",
+                "PCGExCollections"
             }
         );
 
-        // The module does not expose an interop API yet. Keep both sides of the boundary private until one is needed.
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "CoreUObject",
                 "Engine",
                 "PCG",
                 "PCGUtilsDynMesh",
