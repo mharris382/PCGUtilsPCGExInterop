@@ -25,7 +25,11 @@ public class PCGUtilsPCGExDynMeshInterop : ModuleRules
                 "DynamicMesh",
                 "GeometryCore",
                 "GeometryFramework",
-                "PCGGeometryScriptInterop"
+                "PCGGeometryScriptInterop",
+                // PainterEx | Noise is a PCGUtils Painter fed by PCGEx Noise3D definitions.
+                "PCGUtilsPainter",
+                "PCGExNoise3D",
+                "GeometryScriptingCore"
             }
         );
 

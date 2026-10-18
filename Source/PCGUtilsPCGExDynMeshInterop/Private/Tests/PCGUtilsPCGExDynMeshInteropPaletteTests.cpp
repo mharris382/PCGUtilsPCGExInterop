@@ -127,17 +127,42 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 
 	bool bFoundRealizeBuilders = false;
 
+	// The category of a PCGUtils Painter, found by name: this module must not include PCGUtilsPainter elements.
+	const UClass* PainterBlendClass = FindObject<UClass>(nullptr, TEXT("/Script/PCGUtilsPainter.PCGDynMeshPainterMathProviderSettings"));
+	if (!TestNotNull(TEXT("The PCGUtils Painter | Blend class is loaded"), PainterBlendClass))
+	{
+		return false;
+	}
+	const FString PainterCategory = StaticEnum<EPCGSettingsType>()->GetDisplayNameTextByValue(
+		static_cast<int64>(PainterBlendClass->GetDefaultObject<UPCGSettings>()->GetType())).ToString();
+
 	for (const FEntry& Entry : Entries)
 	{
 		const FString Where = FString::Printf(TEXT("%s (%s)"), *Entry.Label, *Entry.ClassName);
 
-		// An element deriving from UPCGSettings without overriding GetType() silently lands in Generic. These
-		// inherit GetType() from their PCGUtilsDynMesh base, and this is what proves the inheritance holds.
-		TestTrue(*FString::Printf(TEXT("%s has a PCGUtils DynMesh menu category"), *Where),
-			Entry.Category.StartsWith(TEXT("PCGUtils|DynMesh")));
+		// Two families: DynMeshEx | for DynMesh elements, PainterEx | for Painters (the PCGEx twin of Painter |).
+		const bool bPainter = Entry.Label.StartsWith(TEXT("PainterEx | "));
+		const FString Prefix = bPainter ? TEXT("PainterEx | ") : TEXT("DynMeshEx | ");
 
-		TestTrue(*FString::Printf(TEXT("%s carries the DynMeshEx| prefix"), *Where),
-			Entry.Label.StartsWith(TEXT("DynMeshEx | ")));
+		// An element deriving from UPCGSettings without overriding GetType() silently lands in Generic. These
+		// inherit GetType() from their PCGUtils base, and this is what proves the inheritance holds. Painters sit
+		// wherever the PCGUtils Painters sit, so a PainterEx node is listed beside Painter | Blend.
+		if (bPainter)
+		{
+			TestEqual(*FString::Printf(TEXT("%s shares the PCGUtils Painter menu category"), *Where),
+				Entry.Category, PainterCategory);
+		}
+		else
+		{
+			TestTrue(*FString::Printf(TEXT("%s has a PCGUtils DynMesh menu category"), *Where),
+				Entry.Category.StartsWith(TEXT("PCGUtils|DynMesh")));
+		}
+		TestTrue(*FString::Printf(TEXT("%s carries the DynMeshEx| or PainterEx| prefix"), *Where),
+			bPainter || Entry.Label.StartsWith(TEXT("DynMeshEx | ")));
+		if (bPainter)
+		{
+			TestTrue(*FString::Printf(TEXT("'Painter' finds %s"), *Where), Matches(Entry.SearchText, TEXT("Painter")));
+		}
 
 		// One "DynMesh" search must still return the whole modelling library, these nodes included.
 		TestTrue(*FString::Printf(TEXT("'DynMesh' finds %s"), *Where), Matches(Entry.SearchText, TEXT("DynMesh")));
@@ -149,9 +174,10 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 		TestFalse(*FString::Printf(TEXT("'GC' excludes %s"), *Where), Matches(Entry.SearchText, TEXT("GC")));
 
 		// The name never repeats its family.
-		const FString Name = Entry.Label.RightChop(FString(TEXT("DynMeshEx | ")).Len()).ToLower();
+		const FString Name = Entry.Label.RightChop(Prefix.Len()).ToLower();
 		TestFalse(*FString::Printf(TEXT("%s name omits DynMesh"), *Where), Name.Contains(TEXT("dynmesh")));
 		TestFalse(*FString::Printf(TEXT("%s name omits DynamicMesh"), *Where), Name.Contains(TEXT("dynamicmesh")));
+		TestFalse(*FString::Printf(TEXT("%s name omits Painter"), *Where), bPainter && Name.Contains(TEXT("painter")));
 
 		TestFalse(*FString::Printf(TEXT("%s subtitle is not a qualified enum value"), *Where),
 			Entry.Subtitle.Contains(TEXT("::")));
@@ -169,6 +195,10 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 	}
 
 	TestTrue(TEXT("DynMeshEx | Realize Builders is exposed"), bFoundRealizeBuilders);
+	TestTrue(TEXT("PainterEx | Noise is exposed"), Entries.ContainsByPredicate([](const FEntry& Entry)
+	{
+		return Entry.Label == TEXT("PainterEx | Noise");
+	}));
 	return true;
 }
 
