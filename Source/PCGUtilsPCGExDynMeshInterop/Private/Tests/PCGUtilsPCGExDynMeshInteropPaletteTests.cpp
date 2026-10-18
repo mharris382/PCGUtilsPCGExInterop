@@ -140,9 +140,11 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 	{
 		const FString Where = FString::Printf(TEXT("%s (%s)"), *Entry.Label, *Entry.ClassName);
 
-		// Two families: DynMeshEx | for DynMesh elements, PainterEx | for Painters (the PCGEx twin of Painter |).
+		// Three families, each the PCGEx twin of a PCGUtils one: DynMeshEx | for DynMesh elements, PainterEx | for
+		// Painters, SelectEx | for Selectors.
 		const bool bPainter = Entry.Label.StartsWith(TEXT("PainterEx | "));
-		const FString Prefix = bPainter ? TEXT("PainterEx | ") : TEXT("DynMeshEx | ");
+		const bool bSelect = Entry.Label.StartsWith(TEXT("SelectEx | "));
+		const FString Prefix = bPainter ? TEXT("PainterEx | ") : bSelect ? TEXT("SelectEx | ") : TEXT("DynMeshEx | ");
 
 		// An element deriving from UPCGSettings without overriding GetType() silently lands in Generic. These
 		// inherit GetType() from their PCGUtils base, and this is what proves the inheritance holds. Painters sit
@@ -157,8 +159,12 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 			TestTrue(*FString::Printf(TEXT("%s has a PCGUtils DynMesh menu category"), *Where),
 				Entry.Category.StartsWith(TEXT("PCGUtils|DynMesh")));
 		}
-		TestTrue(*FString::Printf(TEXT("%s carries the DynMeshEx| or PainterEx| prefix"), *Where),
-			bPainter || Entry.Label.StartsWith(TEXT("DynMeshEx | ")));
+		TestTrue(*FString::Printf(TEXT("%s carries the DynMeshEx|, PainterEx| or SelectEx| prefix"), *Where),
+			bPainter || bSelect || Entry.Label.StartsWith(TEXT("DynMeshEx | ")));
+		if (bSelect)
+		{
+			TestTrue(*FString::Printf(TEXT("'DynMesh Select' finds %s"), *Where), Matches(Entry.SearchText, TEXT("DynMesh Select")));
+		}
 		if (bPainter)
 		{
 			TestTrue(*FString::Printf(TEXT("'Painter' finds %s"), *Where), Matches(Entry.SearchText, TEXT("Painter")));
@@ -178,6 +184,7 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 		TestFalse(*FString::Printf(TEXT("%s name omits DynMesh"), *Where), Name.Contains(TEXT("dynmesh")));
 		TestFalse(*FString::Printf(TEXT("%s name omits DynamicMesh"), *Where), Name.Contains(TEXT("dynamicmesh")));
 		TestFalse(*FString::Printf(TEXT("%s name omits Painter"), *Where), bPainter && Name.Contains(TEXT("painter")));
+		TestFalse(*FString::Printf(TEXT("%s name omits select/selection/selector"), *Where), bSelect && Name.Contains(TEXT("select")));
 
 		TestFalse(*FString::Printf(TEXT("%s subtitle is not a qualified enum value"), *Where),
 			Entry.Subtitle.Contains(TEXT("::")));
@@ -198,6 +205,10 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 	TestTrue(TEXT("PainterEx | Noise is exposed"), Entries.ContainsByPredicate([](const FEntry& Entry)
 	{
 		return Entry.Label == TEXT("PainterEx | Noise");
+	}));
+	TestTrue(TEXT("SelectEx | By Filters is exposed"), Entries.ContainsByPredicate([](const FEntry& Entry)
+	{
+		return Entry.Label == TEXT("SelectEx | By Filters");
 	}));
 	return true;
 }

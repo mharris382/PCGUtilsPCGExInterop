@@ -31,3 +31,31 @@ composite (Paint DynMesh Vertex Color, Painter | Blend, Painter | Blur, ...).
 - Uber Noise's Mutate mode has no setting here; blend the noise with another Painter through Painter | Blend.
 
 Palette family: `PainterEx | `, the PCGEx twin of PCGUtils' `Painter | `, listed beside the PCGUtils Painters.
+
+## SelectEx | By Filters
+
+A DynMesh Selector that selects the vertices passing a stack of PCGEx point or data filters. It replaces
+`DynMesh To Points -> Uber Filter -> Select From Vertex IDs` with one node, and works anywhere a Selector does
+(Build DynMesh Selection, any process node's Selector pin, Selection to Painter, ...).
+
+Each evaluation turns the mesh's vertices into one point each and runs the filters on them, ANDed in PCGEx order
+exactly as Uber Filter runs them:
+
+- **$Position** is the vertex position, converted to world space by the mesh's PCG target actor by default
+  (**Positions To World**), so spatial filters such as Inside Path compare against world-space paths.
+- **$Color** is the vertex color (white when the mesh has no color overlay).
+- **$Rotation** points its Up (Z) axis along the vertex normal (**Rotation From Normal**), so dot and angle filters
+  can use `$Rotation.Up`.
+- **$Seed** comes from the position, as PCG seeds new points. Every other point property keeps its default.
+- The mesh's **@Data** domain is carried over. A filter reads mesh attributes with an explicit `@Data.` selector,
+  and data (collection) filters judge the mesh as a whole. There are no point-domain attributes.
+
+**Invert Selection** selects the vertices that fail. The result is a vertex selection; edge and triangle consumers
+get it through the standard domain conversion. Cluster (vtx/edge) filters are refused with an error, since a mesh's
+vertices are plain points.
+
+PCGEx filters initialize against a PCGEx context, while a Selector runs inside whichever node consumes it. Each
+evaluation therefore runs the filters in a short-lived PCGEx context that borrows the consumer's execution source
+and node, so target-actor lookups resolve and filter errors land on the consuming node.
+
+Palette family: `SelectEx | `, the PCGEx twin of PCGUtils' `Select | `.

@@ -29,7 +29,11 @@ public class PCGUtilsPCGExDynMeshInterop : ModuleRules
                 // PainterEx | Noise is a PCGUtils Painter fed by PCGEx Noise3D definitions.
                 "PCGUtilsPainter",
                 "PCGExNoise3D",
-                "GeometryScriptingCore"
+                "GeometryScriptingCore",
+                // SelectEx | By Filters runs PCGEx point and data filters over a mesh's vertices.
+                "PCGExFilters",
+                // Vertex color helpers (PCGUtilsDynMeshAttributeHelpers).
+                "PCGUtils"
             }
         );
 
