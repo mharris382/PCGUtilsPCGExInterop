@@ -140,6 +140,18 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 	{
 		const FString Where = FString::Printf(TEXT("%s (%s)"), *Entry.Label, *Entry.ClassName);
 
+		// A fourth family: PCGEx point filters, which must read exactly like native PCGEx filters ("PCGEx | Filter : ...")
+		// and sit in the engine Filter category, so they show up beside them and plug into any filter pin.
+		if (Entry.Label.Contains(TEXT("Filter : ")))
+		{
+			TestTrue(*FString::Printf(TEXT("%s reads like a PCGEx filter"), *Where), Entry.Label.StartsWith(TEXT("PCGEx | Filter : ")));
+			TestEqual(*FString::Printf(TEXT("%s sits in the Filter category"), *Where), Entry.Category,
+				StaticEnum<EPCGSettingsType>()->GetDisplayNameTextByValue(static_cast<int64>(EPCGSettingsType::Filter)).ToString());
+			TestTrue(*FString::Printf(TEXT("'DynMesh' finds %s"), *Where), Matches(Entry.SearchText, TEXT("DynMesh")));
+			TestTrue(*FString::Printf(TEXT("'Filter' finds %s"), *Where), Matches(Entry.SearchText, TEXT("Filter")));
+			continue;
+		}
+
 		// Three families, each the PCGEx twin of a PCGUtils one: DynMeshEx | for DynMesh elements, PainterEx | for
 		// Painters, SelectEx | for Selectors.
 		const bool bPainter = Entry.Label.StartsWith(TEXT("PainterEx | "));
@@ -209,6 +221,10 @@ bool FPCGUtilsPCGExDynMeshInteropPaletteTest::RunTest(const FString&)
 	TestTrue(TEXT("SelectEx | By Filters is exposed"), Entries.ContainsByPredicate([](const FEntry& Entry)
 	{
 		return Entry.Label == TEXT("SelectEx | By Filters");
+	}));
+	TestTrue(TEXT("PCGEx | Filter : Mesh Occlusion is exposed"), Entries.ContainsByPredicate([](const FEntry& Entry)
+	{
+		return Entry.Label == TEXT("PCGEx | Filter : Mesh Occlusion");
 	}));
 	return true;
 }

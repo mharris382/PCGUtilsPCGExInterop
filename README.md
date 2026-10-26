@@ -59,3 +59,21 @@ evaluation therefore runs the filters in a short-lived PCGEx context that borrow
 and node, so target-actor lookups resolve and filter errors land on the consuming node.
 
 Palette family: `SelectEx | `, the PCGEx twin of PCGUtils' `Select | `.
+
+## Filter : Mesh Occlusion
+
+A PCGEx point filter that passes points whose ray hits the DynMeshes on its **Occluders** pin (**Result** =
+Occluded), or points whose ray is clear (Unoccluded). It is the point twin of PCGUtils' Select | By Mesh Occlusion
+and uses the same ray tests (`PCGUtilsDynMeshOcclusion::FOccluderSet`). Use it in any PCGEx node that takes
+filters, such as Uber Filter.
+
+- **Direction**: a constant (default up) or a per-point vector attribute (`$Rotation.Up` by default). **Flip**
+  reverses it. **Direction In Point Space** turns it by each point's rotation.
+- **Max Distance**: a constant or a per-point attribute, in world units. 0 means unlimited; negative values are read
+  as their magnitude.
+- **Origin Offset** starts each ray a little along its direction, so a point lying on an occluder does not hit it.
+- **Occluders Are Actor Local** (advanced, on by default) places each occluder by its own target actor.
+
+A point with a zero direction fails. With no occluder triangles the filter follows its **Missing Data** policy. The
+node is not cached, because its spatial indexes are built from that run's meshes. Listed as
+`PCGEx | Filter : Mesh Occlusion` among the PCGEx filters.
