@@ -77,3 +77,36 @@ filters, such as Uber Filter.
 A point with a zero direction fails. With no occluder triangles the filter follows its **Missing Data** policy. The
 node is not cached, because its spatial indexes are built from that run's meshes. Listed as
 `PCGEx | Filter : Mesh Occlusion` among the PCGEx filters.
+
+## PointEx | Assign Value From Noise
+
+One node for a chain that otherwise takes four or five: Uber Noise -> random offset -> clamp -> remap -> curve ->
+scale by attribute -> Lerp(Min, Max, noise) -> write.
+
+- **Noises** (required): PCGEx Noise3D definitions, stacked by Priority with their own weights and blend modes,
+  exactly as Uber Noise stacks them. Sampled at each point's position.
+- **Noise shaping**, in this order:
+  - **Random Offset** (off): adds a random value in [-amount, +amount] per point, seeded by the point's seed and
+    the node's Seed.
+  - **Clamp** (on, 0-1): holds the offset noise inside [Clamp Min, Clamp Max].
+  - **Remap** (on, band 0-1): the [Remap In Min, Remap In Max] band of the noise becomes 0 -> 1; anything outside
+    is held at 0 or 1. A narrow band sharpens the noise, In Min above In Max inverts it, an equal pair is a hard
+    step. **Use Remap Curve** then shapes the 0-1 value.
+  - **Scale By Attribute** (off): multiplies by a per-point attribute (**Scale Attribute Name**), e.g. a falloff.
+- **Lerp**: **Value Type** Scalar, Vector 2, Vector, Vector 4 or Rotator, with **Min** and **Max** each a constant
+  or a per-point attribute. A Rotator lerps pitch, yaw and roll separately, so Min 0 / Max 360 yaw gives any heading.
+- **Output Attribute Name** (`$Density`): attribute or point property to write; a missing attribute is created as
+  the Value Type, an existing one keeps its type when the result converts (double to `$Density`'s float, Rotator to
+  `$Rotation`'s quaternion). **Write Noise** (off) also writes the shaped 0-1 noise to **Noise Attribute Name**.
+
+The output is the input duplicated with these values written, so other attributes, tags and properties are kept.
+
+## Filter : Shaped Noise
+
+PCGEx's Filter : Noise with the same shaping steps in front of the comparison (random offset, clamp, remap band
+and curve, scale by attribute), so a noise filter no longer has to be swapped out when it needs remapping. The
+shaped noise is compared (default `>= 0.5`) against a constant or a per-point attribute. **Seed** drives the
+random offset. Works in any PCGEx node that takes filters. Listed as `PCGEx | Filter : Shaped Noise`.
+
+Both nodes share `FPCGUtilsExNoiseShapingDetails` (`Noise/PCGUtilsExNoiseShaping.h`), which also offers
+`PCGUtilsExNoise::FFactoryNoiseGenerator` for sampling PCGEx noise in a plain PCG element.

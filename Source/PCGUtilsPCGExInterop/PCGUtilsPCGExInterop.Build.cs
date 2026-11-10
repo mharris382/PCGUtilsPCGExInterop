@@ -14,17 +14,22 @@ public class PCGUtilsPCGExInterop : ModuleRules
             {
                 "Core",
                 "CoreUObject",
-                "PCGExCollections"
+                "PCGExCollections",
+                // The noise shorthand nodes name PCGEx noise, filter and shorthand types in their public headers.
+                "Engine", // FRuntimeFloatCurve in the noise shaping details
+                "PCG",
+                "PCGExCore",
+                "PCGExFilters",
+                "PCGExNoise3D"
             }
         );
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "Engine",
-                "PCG",
                 "PCGUtilsDynMesh",
-                "PCGExMatching"
+                "PCGExMatching",
+                "PCGUtilsCore"
             }
         );
     }
